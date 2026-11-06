@@ -1,0 +1,66 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <AssemblyName>CameraLocation</AssemblyName>
+    <RootNamespace>CameraLocation</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <OutputPath>bin\</OutputPath>
+
+    <!-- Change this (or pass /p:RailroaderDir=...) if your install lives elsewhere. -->
+    <RailroaderDir Condition="'$(RailroaderDir)' == ''">C:\Program Files (x86)\Steam\steamapps\common\Railroader</RailroaderDir>
+    <ManagedDir>$(RailroaderDir)\Railroader_Data\Managed</ManagedDir>
+    <!-- The game loads mods (asset packs) from Documents\Railroader\Mods. -->
+    <ModsDir Condition="'$(ModsDir)' == ''">$([System.Environment]::GetFolderPath(SpecialFolder.MyDocuments))\Railroader\Mods</ModsDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Lets you build against .NET Framework 4.7.2 without the full targeting pack installed. -->
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="$(ManagedDir)\Railroader.dll" Private="false" />
+    <Reference Include="$(ManagedDir)\Railroader.Modding.dll" Private="false" />
+    <Reference Include="$(ManagedDir)\UnityEngine.dll" Private="false" />
+    <Reference Include="$(ManagedDir)\UnityEngine.*.dll" Private="false" />
+    <!-- The settings window uses the game's panel builder and the Input System; its signatures mention types from these. -->
+    <Reference Include="$(ManagedDir)\Unity.InputSystem.dll" Private="false" Condition="Exists('$(ManagedDir)\Unity.InputSystem.dll')" />
+    <Reference Include="$(ManagedDir)\Unity.TextMeshPro.dll" Private="false" Condition="Exists('$(ManagedDir)\Unity.TextMeshPro.dll')" />
+    <Reference Include="$(ManagedDir)\KeyValue.Runtime.dll" Private="false" Condition="Exists('$(ManagedDir)\KeyValue.Runtime.dll')" />
+    <Reference Include="$(ManagedDir)\Core.dll" Private="false" Condition="Exists('$(ManagedDir)\Core.dll')" />
+    <Reference Include="$(ManagedDir)\AssetPack.Common.dll" Private="false" Condition="Exists('$(ManagedDir)\AssetPack.Common.dll')" />
+    <Reference Include="$(ManagedDir)\Map.Runtime.dll" Private="false" Condition="Exists('$(ManagedDir)\Map.Runtime.dll')" />
+    <Reference Include="$(ManagedDir)\SimpleGraph.Runtime.dll" Private="false" Condition="Exists('$(ManagedDir)\SimpleGraph.Runtime.dll')" />
+    <Reference Include="$(ManagedDir)\Unity.Burst.dll" Private="false" Condition="Exists('$(ManagedDir)\Unity.Burst.dll')" />
+    <Reference Include="$(ManagedDir)\Unity.Mathematics.dll" Private="false" Condition="Exists('$(ManagedDir)\Unity.Mathematics.dll')" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackFiles Include="$(OutDir)CameraLocation.dll;$(MSBuildProjectDirectory)\Info.json" />
+  </ItemGroup>
+
+  <!-- Copies the built mod straight into the game's Mods folder. Disable with /p:DeployToGame=false -->
+  <Target Name="DeployToGame" AfterTargets="Build" Condition="'$(DeployToGame)' != 'false'">
+    <Copy SourceFiles="@(PackFiles)" DestinationFolder="$(ModsDir)\CameraLocation" />
+    <Message Importance="high" Text="Deployed CameraLocation to $(ModsDir)\CameraLocation" />
+  </Target>
+
+  <!-- dotnet build -c Release /p:Package=true  ->  dist\CameraLocation-<version>.zip containing CameraLocation\{dll,Info.json} -->
+  <Target Name="PackageRelease" AfterTargets="Build" Condition="'$(Package)' == 'true'">
+    <PropertyGroup>
+      <StageDir>$(MSBuildProjectDirectory)\dist\stage\CameraLocation</StageDir>
+      <ReleaseVersion Condition="'$(ReleaseVersion)' == ''">1.0.0</ReleaseVersion>
+    </PropertyGroup>
+    <RemoveDir Directories="$(MSBuildProjectDirectory)\dist" />
+    <MakeDir Directories="$(StageDir)" />
+    <Copy SourceFiles="@(PackFiles)" DestinationFolder="$(StageDir)" />
+    <ZipDirectory SourceDirectory="$(MSBuildProjectDirectory)\dist\stage" DestinationFile="$(MSBuildProjectDirectory)\dist\CameraLocation-$(ReleaseVersion).zip" />
+    <Message Importance="high" Text="Packaged dist\CameraLocation-$(ReleaseVersion).zip" />
+  </Target>
+
+</Project>

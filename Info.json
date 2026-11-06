@@ -1,0 +1,17 @@
+{
+  "identifier": "exp232/cameralocation",
+  "name": "Camera Location",
+  "author": "Exp232",
+  "version": "1.0.0",
+  "description": "Shows the camera's map position (X, Z and height) in a corner of the screen. The corner, text size, margins, background and decimals are set in the Mod Settings Hub (or Ctrl+F8 without it).",
+  "url": "https://github.com/Exp232/CameraLocation",
+  "scope": "optional",
+  "dependencies": {
+    "required": [
+      "rr/game >=0.6.0"
+    ]
+  },
+  "assemblies": [
+    "CameraLocation.dll"
+  ]
+}
